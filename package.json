@@ -1,7 +1,7 @@
 {
   "name": "nuxt-matomo",
   "version": "1.0.0",
-  "description": "Matomo support for Nuxt 3",
+  "description": "Matomo for Nuxt",
   "repository": "openmost/nuxt-matomo",
   "license": "MIT",
   "type": "module",
