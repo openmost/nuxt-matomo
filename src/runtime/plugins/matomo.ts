@@ -1,22 +1,24 @@
 import {defineNuxtPlugin} from "#imports"
+import {useRoute} from "nuxt/app";
 
 export default defineNuxtPlugin((nuxtApp) => {
 
   if (process.client) {
     const options = nuxtApp.$config.public.matomo;
+    const route = useRoute();
 
     /**
      * Matomo tracking code
      */
     if (options.host && options.idSite) {
 
-      var _paq = window._paq = window._paq || [];
-      _paq.push(["setExcludedQueryParams", ["\/.*\/"]]);
+      const _paq = window._paq = window._paq || [];
+      _paq.push(["setExcludedQueryParams", ["/.*/"]]);
 
       /**
        * NUXT router support
        */
-      _paq.push(['setCustomUrl', to.fullPath]);
+      _paq.push(['setCustomUrl', route.fullPath]);
       _paq.push(['setDocumentTitle', document.title]);
 
       /**
@@ -91,10 +93,10 @@ export default defineNuxtPlugin((nuxtApp) => {
       }
 
       (function () {
-        var u = options.host + '/';
+        const u = options.host + '/';
         _paq.push(['setTrackerUrl', u + 'matomo.php']);
         _paq.push(['setSiteId', options.idSite.toString()]);
-        var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+        const d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
         g.async = true;
         g.src = u + 'matomo.js';
         s.parentNode.insertBefore(g, s);

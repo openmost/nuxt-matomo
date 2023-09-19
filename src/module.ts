@@ -38,11 +38,6 @@ export default defineNuxtModule<ModuleOptions>({
       nuxt: '^3.0.0'
     }
   },
-  // Default configuration options of the Nuxt module
-  defaults: {
-    trackPageView: true,
-    enableLinkTracking: true,
-  },
   // Shorthand sugar to register Nuxt hooks
   hooks: {},
   // The function holding your module logic, it can be asynchronous
@@ -51,7 +46,10 @@ export default defineNuxtModule<ModuleOptions>({
 
     // 1. Set up runtime configuration
     // @ts-ignore
-    const moduleOptions: ModuleOptions = defu(nuxt.options.runtimeConfig.public.matomo, options)
+    const moduleOptions: ModuleOptions = defu(nuxt.options.runtimeConfig.public.matomo, options, {
+      trackPageView: true,
+      enableLinkTracking: true,
+    })
     nuxt.options.runtimeConfig.public.matomo = moduleOptions
 
     // 2. Add plugins
