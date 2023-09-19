@@ -1,6 +1,6 @@
 {
   "name": "@openmost/nuxt-matomo",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Matomo for Nuxt",
   "repository": "openmost/nuxt-matomo",
   "license": "MIT",
@@ -42,5 +42,8 @@
     "eslint": "^8.49.0",
     "nuxt": "^3.7.3",
     "vitest": "^0.33.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
