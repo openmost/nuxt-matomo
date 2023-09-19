@@ -1,5 +1,8 @@
 <template>
-  <div id="app" class="default-layout">
+  <div
+    id="app"
+    class="default-layout"
+  >
     <h1>Demo site</h1>
 
     <nav>
