@@ -1,6 +1,10 @@
 export default function () {
 
-  var _paq = window._paq = window._paq || [];
+  let _paq = []
+
+  if (process.client) {
+    _paq = window._paq = window._paq || [];
+  }
 
   function trackPageView(title, url) {
     _paq.push(['setCustomUrl', url]);

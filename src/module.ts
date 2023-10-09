@@ -1,4 +1,4 @@
-import {defineNuxtModule, addPlugin, createResolver, addRouteMiddleware, addImports} from '@nuxt/kit'
+import {defineNuxtModule, addPlugin, createResolver, addRouteMiddleware, addImportsDir} from '@nuxt/kit'
 import {defu} from 'defu'
 
 // Module options TypeScript interface definition
@@ -58,13 +58,19 @@ export default defineNuxtModule<ModuleOptions>({
 
     // 3. Add middleware
     addRouteMiddleware({
+      name: "pageview",
+      path: resolver.resolve("./runtime/middleware/pageview"),
+      global: true
+    })
+
+    addRouteMiddleware({
       name: "datalayer",
       path: resolver.resolve("./runtime/middleware/datalayer"),
       global: true
     })
 
     // 4. Add composables
-    addImports([{name: "useMatomo", from: resolver.resolve("./runtime/composables/useMatomo")}])
+    addImportsDir(resolver.resolve("composables"));
 
   }
 })

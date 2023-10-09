@@ -7,7 +7,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
       _mtm.push({
         event: 'mtm.PageView',
         nuxtPageUrl: to.fullPath,
-        nuxtPageTitle: document.title,
+        nuxtPageTitle: to.meta.title,
         nuxtPageOrigin: from.fullPath
       })
     }

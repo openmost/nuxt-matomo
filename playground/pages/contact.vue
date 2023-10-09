@@ -5,10 +5,14 @@
 </template>
 
 <script setup>
-import {useSeoMeta} from "nuxt/app";
+import {useSeoMeta, useHead} from "nuxt/app";
+
+useHead({
+  title: 'Contact - head'
+})
 
 useSeoMeta({
-  title: 'Contact'
+  title: 'Contact - seo'
 })
 </script>
 

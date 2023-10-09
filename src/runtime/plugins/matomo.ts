@@ -4,9 +4,14 @@ import {useRoute} from "nuxt/app";
 export default defineNuxtPlugin((nuxtApp) => {
 
   if (process.client) {
+
+    nuxtApp.hook('page:start', (page) => {
+      console.log(page.ctx)
+    })
+
+
     const options = nuxtApp.$config.public.matomo;
     const route = useRoute();
-
     /**
      * Matomo tracking code
      */

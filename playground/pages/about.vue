@@ -8,6 +8,6 @@
 import {useSeoMeta} from "nuxt/app";
 
 useSeoMeta({
-  title: 'About'
+  title: 'About - seo'
 })
 </script>

@@ -5,9 +5,14 @@
 </template>
 
 <script setup>
-import {useSeoMeta} from "nuxt/app";
+import {useSeoMeta, useHead} from "nuxt/app";
+import useMatomo from "../../src/runtime/composables/useMatomo.js";
 
-useSeoMeta({
-  title: 'Home'
+useHead({
+  title: 'Home - head'
 })
+
+const {trackEvent} = useMatomo();
+
+trackEvent('Test', 'haha', 'yolo', 1);
 </script>
