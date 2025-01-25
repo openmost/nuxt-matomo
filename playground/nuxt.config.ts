@@ -1,5 +1,6 @@
 export default defineNuxtConfig({
   modules: ['../src/module'],
+  devtools: { enabled: true },
   runtimeConfig: {
     public: {
       matomo: {
@@ -8,6 +9,5 @@ export default defineNuxtConfig({
       },
     },
   },
-  devtools: {enabled: true},
   compatibilityDate: '2025-01-24',
 })

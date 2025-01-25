@@ -1,5 +1,5 @@
 export default function useDataLayerPush(args) {
-  if (process.client) {
+  if (import.meta.client) {
     window.dataLayer = window.dataLayer || []
     window.dataLayer.push(args)
   }
