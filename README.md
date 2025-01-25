@@ -51,7 +51,7 @@ NUXT_PUBLIC_MATOMO_HOST=https://matomo.example.com
 NUXT_PUBLIC_MATOMO_CONTAINER_ID=xxxxxxxx
 ```
 
-5. Add "History Change" trigger to your Matomo tag
+5. Update your Matomo page view tag configuration
 
 As [SPA doesn't work with Matomo Tag Manager](https://developer.matomo.org/guides/spa-tracking) by default, you have to add a second trigger to your Matomo tag in the Tag Manager UI.
 
