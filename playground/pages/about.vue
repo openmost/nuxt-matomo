@@ -6,6 +6,8 @@
 </template>
 
 <script setup>
+import { useSeoMeta } from '#imports'
+
 useSeoMeta({
   title: 'About us',
 })

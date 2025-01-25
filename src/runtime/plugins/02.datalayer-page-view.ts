@@ -1,4 +1,4 @@
-import { defineNuxtPlugin } from '#app'
+import { defineNuxtPlugin, useDataLayerPush } from '#imports'
 
 export default defineNuxtPlugin((NuxtApp) => {
   if (import.meta.client) {
