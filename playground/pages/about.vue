@@ -1,13 +1,12 @@
 <template>
   <div>
     <h1>About</h1>
+    <NuxtLink to="/">Home</NuxtLink>
   </div>
 </template>
 
 <script setup>
-import {useSeoMeta} from "nuxt/app";
-
 useSeoMeta({
-  title: 'About - seo'
+  title: 'About us',
 })
 </script>

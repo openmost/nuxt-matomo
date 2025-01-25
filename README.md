@@ -46,37 +46,25 @@ export default defineNuxtConfig({
 
 ## Config
 
-Define variables to your `.env` file:
-```
-NUXT_MATOMO_HOST=https://matomo.my-website.com
-NUXT_MATOMO_ID_SITE=1
-NUXT_MATOMO_ID_CONTAINER=XXXXXXX
-```
-
-Then register config in the `matomo` section to your `nuxt.config.ts`:
+Register config in the `matomo` section to your `nuxt.config.ts`:
 ```
 runtimeConfig: {
-    public: {
-      matomo: {
-        host: process.env.NUXT_MATOMO_HOST,
-        idSite: process.env.NUXT_MATOMO_ID_SITE,
-        idContainer: process.env.NUXT_MATOMO_ID_CONTAINER,
-      }
-    }
-  }
-```
-
-Enable or disable features using the `matomo` key in `nuxt.config.js`:
-```
-export default defineNuxtConfig({
-
-  matomo: {
-    enableHeartBeatTimer: true,
-    heartBeatTimerActiveTime: 700
+  public: {
+    matomo: {
+      host: 'https://matomo.example.com',
+      containerId: 'xxxxxxxx',
+    },
   },
-  
-})
+}
 ```
+
+You can also use variables with your `.env` file:
+```
+NUXT_PUBLIC_MATOMO_HOST=https://matomo.example.com
+NUXT_PUBLIC_MATOMO_CONTAINER_ID=xxxxxxxx
+NUXT_PUBLIC_MATOMO_SITE_ID=1
+```
+
 
 <!-- Badges -->
 

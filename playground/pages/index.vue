@@ -1,18 +1,24 @@
 <template>
   <div>
     <h1>Home</h1>
+    <NuxtLink to="/contact">Contact</NuxtLink>
+    <NuxtLink to="/about">About</NuxtLink>
+
+    <br>
+
+    <button @click="onClick">
+      TriggerEvent
+    </button>
   </div>
 </template>
 
 <script setup>
-import {useSeoMeta, useHead} from "nuxt/app";
-import useMatomo from "../../src/runtime/composables/useMatomo.js";
-
-useHead({
-  title: 'Home - head'
+useSeoMeta({
+  title: 'Home page',
+  description: 'Description text',
 })
 
-const {trackEvent} = useMatomo();
-
-trackEvent('Test', 'haha', 'yolo', 1);
+function onClick() {
+  useMatomoEvent('Test', 'Demo', 'Foo')
+}
 </script>
