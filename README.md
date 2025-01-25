@@ -13,13 +13,13 @@
 
 ```bash
 # Using pnpm
-pnpm add -D @openmost/nuxt-matomo
+pnpm add @openmost/nuxt-matomo
 
 # Using yarn
-yarn add --dev @openmost/nuxt-matomo
+yarn add @openmost/nuxt-matomo
 
 # Using npm
-npm install --save-dev @openmost/nuxt-matomo
+npm install @openmost/nuxt-matomo
 ```
 
 2. Add `@openmost/nuxt-matomo` to the `modules` section of `nuxt.config.ts`
