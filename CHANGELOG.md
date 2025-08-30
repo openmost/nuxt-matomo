@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.1.1
+
+[compare changes](https://github.com/openmost/nuxt-matomo/compare/v2.0.2...v2.1.1)
+
+## v2.1.0
+
+fix: Matomo Cloud /js/ prefix in container URL
 
 ## v2.0.2
 
