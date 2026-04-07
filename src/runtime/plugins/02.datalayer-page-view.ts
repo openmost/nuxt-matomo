@@ -1,8 +1,9 @@
-import { defineNuxtPlugin, useDataLayerPush } from '#imports'
+import { defineNuxtPlugin, useRouter, useDataLayerPush } from '#imports'
 
-export default defineNuxtPlugin((NuxtApp) => {
+export default defineNuxtPlugin(() => {
   if (import.meta.client) {
-    NuxtApp.$router.afterEach((to, from) => {
+    const router = useRouter()
+    router.afterEach((to, from) => {
       useDataLayerPush({
         event: 'page_view',
         page_url: to.fullPath,
