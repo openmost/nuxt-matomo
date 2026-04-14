@@ -11,10 +11,13 @@ export default defineNuxtPlugin(() => {
       const domain = new URL(matomoHost).hostname
       matomoHost = `https://cdn.matomo.cloud/${domain}`
     }
+    else {
+      matomoHost = matomoHost + '/js'
+    }
 
     if (matomoHost && matomoContainerId) {
       // Generate container URL
-      const url = `${matomoHost}/js/container_${matomoContainerId}.js`
+      const url = `${matomoHost}/container_${matomoContainerId}.js`
 
       // Default Matomo Tag Manager snippet
       const _mtm = window._mtm = window._mtm || []
