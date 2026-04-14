@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.1.4
+
+[compare changes](https://github.com/openmost/nuxt-matomo/compare/v2.1.3...v2.1.4)
+
+### 🩹 Fixes
+
+- Matomo Cloud ([30ce601](https://github.com/openmost/nuxt-matomo/commit/30ce601))
+
+### ❤️ Contributors
+
+- Ronan HELLO <ronan56.hello@gmail.com>
+
 ## v2.1.3
 
 [compare changes](https://github.com/openmost/nuxt-matomo/compare/v2.1.1...v2.1.3)
