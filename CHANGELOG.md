@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.1.3
+
+[compare changes](https://github.com/openmost/nuxt-matomo/compare/v2.1.1...v2.1.3)
+
+### 🩹 Fixes
+
+- EventValue type in composable ([67bf1da](https://github.com/openmost/nuxt-matomo/commit/67bf1da))
+
+### ❤️ Contributors
+
+- Ronan HELLO <ronan56.hello@gmail.com>
+
 ## v2.1.1
 
 [compare changes](https://github.com/openmost/nuxt-matomo/compare/v2.0.2...v2.1.1)

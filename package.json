@@ -1,6 +1,6 @@
 {
   "name": "@openmost/nuxt-matomo",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "Matomo for Nuxt",
   "repository": "openmost/nuxt-matomo",
   "license": "MIT",
