@@ -1,6 +1,10 @@
-export default function useDataLayerPush(args) {
-  if (import.meta.client) {
-    window.dataLayer = window.dataLayer || []
-    window.dataLayer.push(args)
-  }
+import { useRuntimeConfig } from '#imports'
+
+export function useDataLayerPush(args: Record<string, unknown>) {
+  if (!import.meta.client) return
+
+  const name = useRuntimeConfig().public.matomo?.dataLayerName || 'dataLayer'
+  const target = window as unknown as Record<string, unknown[] | undefined>
+  target[name] = target[name] || []
+  target[name]!.push(args)
 }
