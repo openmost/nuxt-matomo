@@ -5,246 +5,213 @@
 [![License][license-src]][license-href]
 [![Nuxt][nuxt-src]][nuxt-href]
 
+[Matomo Tag Manager](https://matomo.org/guide/tag-manager/getting-started-with-tag-manager/) for Nuxt 4.1+, built on top of [Nuxt Scripts](https://scripts.nuxt.com).
+
 - [✨ &nbsp;Release Notes](/CHANGELOG.md)
+- [🏀 &nbsp;Playground](/playground)
 
-## Quick Setup
+## Features
 
-1. Add `@openmost/nuxt-matomo` dependency to your project
+- 🚀 **Loads your Matomo Tag Manager container with [Nuxt Scripts](https://scripts.nuxt.com)**: non-blocking by default (`onNuxtReady`), shows up in Nuxt DevTools, SSR-safe.
+- 🧭 **Single-page app page views that just work**: a `page_view` event with the resolved URL, referrer and **final page title** is pushed on every navigation, so your Matomo tag never records a stale title.
+- 🍪 **Consent-friendly**: set `trigger: 'manual'` and load the container once the visitor opts in.
+- ☁️ **Self-hosted and Matomo Cloud**: the container URL is resolved for you.
+- 🧩 **Typed composables** for events, goals, custom dimensions, custom variables, site search and the data layer.
+- ⚙️ **Environment variables**: every option can be overridden at runtime with `NUXT_PUBLIC_MATOMO_*`.
+
+## Quick setup
+
+Install the module ([Nuxt Scripts](https://scripts.nuxt.com) comes with it and is registered for you):
 
 ```bash
-# Using pnpm
-pnpm add @openmost/nuxt-matomo
-
-# Using yarn
-yarn add @openmost/nuxt-matomo
-
-# Using npm
 npm install @openmost/nuxt-matomo
 ```
 
-2. Add `@openmost/nuxt-matomo` to the `modules` section of `nuxt.config.ts`
-
-```javascript
-export default defineNuxtConfig({
-  modules: [
-    '@openmost/nuxt-matomo'
-  ]
-})
-```
-
-3. Configure the module. Either pass options in `nuxt.config.ts` under the `matomo` key:
+Then add it to your modules with your Matomo URL and container id:
 
 ```ts
+// nuxt.config.ts
 export default defineNuxtConfig({
   modules: ['@openmost/nuxt-matomo'],
   matomo: {
     host: 'https://matomo.example.com',
-    containerId: 'xxxxxxxx',
-    // Optional. Defaults to 'dataLayer' (GTM-style queue).
-    // Set to '_mtm' to push directly into Matomo's own queue.
-    dataLayerName: 'dataLayer',
+    containerId: 'aBcD1234',
   },
 })
 ```
 
-…or via `runtimeConfig.public.matomo`, which lets you override per environment:
+That's it: the container loads on every page, and a `page_view` event is pushed on every navigation. Follow [Configure your container](#configure-your-container) once in Matomo so those page views are tracked.
+
+## Options
+
+| Option          | Env var                              | Default         | Description                                                                                  |
+|-----------------|--------------------------------------|-----------------|----------------------------------------------------------------------------------------------|
+| `host`          | `NUXT_PUBLIC_MATOMO_HOST`            | none            | Your Matomo URL, e.g. `https://matomo.example.com` or `https://example.matomo.cloud`.         |
+| `containerId`   | `NUXT_PUBLIC_MATOMO_CONTAINER_ID`    | none            | Your Tag Manager container id (*Tag Manager → Install code*).                                |
+| `trigger`       | `NUXT_PUBLIC_MATOMO_TRIGGER`         | `'onNuxtReady'` | When the container loads: `'onNuxtReady'`, `'client'` (as soon as possible) or `'manual'`.    |
+| `dataLayerName` | `NUXT_PUBLIC_MATOMO_DATA_LAYER_NAME` | `'dataLayer'`   | The queue `useDataLayerPush` and the `page_view` event write to (`'dataLayer'` or `'_mtm'`). |
+| `pageViewEvent` | none                                 | `true`          | Push a `page_view` event to the data layer on every page.                                    |
+
+Environment variables override `nuxt.config` at runtime, so one build can target several environments:
+
+```dotenv
+NUXT_PUBLIC_MATOMO_HOST=https://matomo.example.com
+NUXT_PUBLIC_MATOMO_CONTAINER_ID=aBcD1234
+```
+
+### Container URL
+
+The container URL is built for you:
+
+| `host`                         | Container URL                                                        |
+|--------------------------------|----------------------------------------------------------------------|
+| `https://matomo.example.com`   | `https://matomo.example.com/js/container_<id>.js`                    |
+| `https://example.matomo.cloud` | `https://cdn.matomo.cloud/example.matomo.cloud/container_<id>.js`    |
+
+If your *Install code* shows another URL (for example a custom domain on Matomo Cloud), copy it into `src`:
 
 ```ts
-export default defineNuxtConfig({
-  modules: ['@openmost/nuxt-matomo'],
-  runtimeConfig: {
-    public: {
-      matomo: {
-        host: 'https://matomo.example.com',
-        containerId: 'xxxxxxxx',
-        dataLayerName: 'dataLayer',
-      },
-    },
-  },
+useScriptMatomoTagManager({
+  src: 'https://cdn.example.com/container_aBcD1234.js',
 })
 ```
 
-If both are set, `runtimeConfig` (and the env vars below) win.
+## Configure your container
 
-| Option           | Module key      | Runtime config key                       | Env var                                 | Default       |
-|------------------|-----------------|------------------------------------------|-----------------------------------------|---------------|
-| Matomo URL       | `host`          | `runtimeConfig.public.matomo.host`        | `NUXT_PUBLIC_MATOMO_HOST`               | —             |
-| MTM container id | `containerId`   | `runtimeConfig.public.matomo.containerId` | `NUXT_PUBLIC_MATOMO_CONTAINER_ID`       | —             |
-| dataLayer name   | `dataLayerName` | `runtimeConfig.public.matomo.dataLayerName` | `NUXT_PUBLIC_MATOMO_DATA_LAYER_NAME` | `dataLayer`   |
+Matomo Tag Manager's default *Page view* trigger only fires on the first page load. The module pushes a `page_view` event on every navigation instead, once the destination page has rendered its title:
 
-4. You can override values from a `.env` file:
-
+```js
+dataLayer.push({
+  event: 'page_view',
+  page_url: '/about',         // route fullPath
+  referrer_url: '/',          // previous route fullPath ('' on the first page)
+  page_title: 'About us',     // document.title, after useHead / useSeoMeta
+})
 ```
-NUXT_PUBLIC_MATOMO_HOST=https://matomo.example.com
-NUXT_PUBLIC_MATOMO_CONTAINER_ID=xxxxxxxx
-# Optional: write to Matomo's native queue instead of GTM's dataLayer
-# NUXT_PUBLIC_MATOMO_DATA_LAYER_NAME=_mtm
-```
-
-5. Configure your Matomo Tag Manager container to track SPA page views
-
-This module fixes [SPA tracking with Matomo Tag Manager](https://developer.matomo.org/guides/spa-tracking) by emitting a `page_view` custom event into the `dataLayer` on every route change, with the new page's URL and title already resolved. You then wire your Matomo Analytics tag to read those values from the `dataLayer` and trigger on that custom event.
 
 In your Matomo Tag Manager container:
 
-1. **Enable GTM `dataLayer` synchronization on the container**
-   - Open your container's settings (*Admin → Container → Edit*).
-   - Turn on the **"Synchronize with GTM Data Layer events"** option (also labelled *"Sync events from the GTM Data Layer"* depending on your Matomo version).
-   - This is required because `useDataLayerPush` (and the automatic `page_view` push) writes to the standard GTM `window.dataLayer` array. Without this option, Matomo Tag Manager listens to its own `_mtm` queue only and will never see the events emitted by this module.
-2. **Create a Data Layer Variable named `DLV - page_url`**
-   - Type: *Data-Layer Variable*
-   - Data Layer Variable Name: `page_url`
-3. **Create a Data Layer Variable named `DLV - page_title`**
-   - Type: *Data-Layer Variable*
-   - Data Layer Variable Name: `page_title`
-4. **Create a Custom Event trigger named `CE - page_view`**
-   - Type: *Custom Event*
-   - Event Name: `page_view`
-5. **Edit your Matomo Analytics tag**
-   - Set the *Custom Page URL* field to `{{DLV - page_url}}`
-   - Set the *Custom Page Title* field to `{{DLV - page_title}}`
-   - Set the trigger to `CE - page_view` (replace any default *Page view* trigger so the tag fires once per SPA navigation, not twice).
-6. **Publish a new version of your container.**
+1. **Read the data layer.** Either enable **Synchronize with GTM Data Layer events** in the container settings (default `dataLayerName: 'dataLayer'`), or set `dataLayerName: '_mtm'` to push directly into Matomo's own queue.
+2. **Create two Data-Layer variables:** `DLV - page_url` (name `page_url`) and `DLV - page_title` (name `page_title`).
+3. **Create a Custom Event trigger** `CE - page_view` with the event name `page_view`.
+4. **Edit your Matomo Analytics tag:** set *Custom Page URL* to `{{DLV - page_url}}`, *Custom Page Title* to `{{DLV - page_title}}`, and replace its *Page view* trigger with `CE - page_view` so each page is tracked once.
+5. **Publish** a new container version.
 
-## Default push on every page
+## Consent
 
-On every route change, the module pushes the following object into the configured queue (`window.dataLayer` by default, or whatever you set `dataLayerName` to):
+Set `trigger: 'manual'` so the container never loads on its own, then load it when the visitor accepts:
 
-```javascript
-dataLayer.push({
-  event: 'page_view',
-  page_url: '/',                 // example value — current route fullPath
-  referrer_url: '/previous',     // example value — previous route fullPath
-  page_title: 'My page title',   // example value — document.title once resolved
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ['@openmost/nuxt-matomo'],
+  matomo: {
+    host: 'https://matomo.example.com',
+    containerId: 'aBcD1234',
+    trigger: 'manual',
+  },
 })
 ```
 
-The push is deferred until after the new page has mounted and `useSeoMeta` / `useHead` has flushed the title to the document, so `page_title` always reflects the destination page.
-
-### Choosing the queue (`dataLayer` vs `_mtm`)
-
-- `dataLayer` *(default)* — the GTM-style array. Use this with the **"Synchronize with GTM Data Layer events"** option enabled in your Matomo Tag Manager container, so MTM relays each push to its own queue. This is the recommended setup for sites that already have other GTM-style tooling.
-- `_mtm` — Matomo Tag Manager's native queue. Use this when you don't want to enable the GTM sync option (or you don't have a `dataLayer` at all). MTM picks events up directly without any extra container setting.
-
-Switch via `dataLayerName: '_mtm'` in `nuxt.config.ts` or `NUXT_PUBLIC_MATOMO_DATA_LAYER_NAME=_mtm` in your `.env`.
-
-## Useful composables
-
-This module allow you to use some helpful composables, here is the list :
-
-### Add data to your `dataLayer` with the `useDataLayerPush` composable
-
-The `useDataLayerPush()` composable pushes any payload to the configured queue (defaults to `window.dataLayer`, or whatever you set `dataLayerName` to — e.g. `_mtm`).
-
-```html
-<template>
-  <button @click="onClick">Click me</button>
-</template>
-
-<script setup>
-function onClick(){
-  useDataLayerPush({
-    event: 'some_event',
-    foo: 'bar',
-  })
-}
+```vue
+<script setup lang="ts">
+const { load, status } = useScriptMatomoTagManager()
 </script>
-```
-
-### Send events with the `useMatomoEvent` composable
-
-The `useMatomoEvent()` composable allow you to send events to Matomo directly from your components.
-
-It also handle custom dimension as 5th parameter (optional).
-
-```html
-<template>
-  <button @click="onClick">Click me</button>
-</template>
-
-<script setup>
-function onClick(){
-  useMatomoEvent('Category', 'Action', 'event_name', 23, {dimension1: 'Some value'})
-}
-</script>
-```
-
-### Convert goals with the `useMatomoGoal` composable
-
-The `useMatomoGoal()` composable allow you to convert goals from your components.
-
-```html
-<template>
-  <button @click="onClick">Click me</button>
-</template>
-
-<script setup>
-function onClick(){
-  useMatomoGoal(4) // 4 is the goal ID
-}
-</script>
-```
-
-
-### Handle custom dimensions with the `useMatomoCustomDimension` composable
-
-The `useMatomoCustomDimension()` composable allow you to send data to your custom dimensions.
-
-```html
 
 <template>
-  <button @click="onClick">Click me</button>
+  <button v-if="status !== 'loaded'" @click="load()">
+    Accept analytics
+  </button>
 </template>
-
-<script setup>
-  function onClick() {
-    useMatomoCustomDimension(1, 'My custom value') // 1 is the custom dimension ID
-  }
-</script>
 ```
 
-### Support custom variables with the `useMatomoCustomVariable` composable
+Commands pushed to `_mtm` and `_paq` before consent stay queued and are processed once the container loads.
 
-The `useMatomoCustomVariable()` composable allow you to send data to your custom variables.
+## Composables
 
-```html
+All composables are auto-imported and safe to call during SSR (they do nothing on the server).
 
-<template>
-  <button @click="onClick">Click me</button>
-</template>
+### `useScriptMatomoTagManager`
 
-<script setup>
-  function onClick() {
-    useMatomoCustomVariable(1, 'variable name', 'variable value', 'page') 
-  }
-</script>
+The [Nuxt Scripts](https://scripts.nuxt.com/docs/api/use-script) instance of your container. Without arguments, it returns the container registered by the module.
+
+```ts
+const { status, load, proxy } = useScriptMatomoTagManager()
+
+// Push to Matomo Tag Manager's queue, even before the container has loaded
+proxy._mtm.push({ event: 'newsletter_signup' })
 ```
 
-### Track site search with the `useMatomoSearch` composable
+### `useDataLayerPush`
 
-The `useMatomoSearch()` composable wraps Matomo's [`trackSiteSearch`](https://developer.matomo.org/api-reference/tracking-javascript#internal-search-tracking) API to log internal-search queries from your components.
+Pushes any payload to the configured data layer (`window.dataLayer` by default).
 
-```html
-<template>
-  <form @submit.prevent="onSearch">
-    <input v-model="query" type="search">
-    <button type="submit">Search</button>
-  </form>
-</template>
-
-<script setup>
-const query = ref('')
-const results = ref([])
-
-async function onSearch() {
-  results.value = await $fetch('/api/search', { params: { q: query.value } })
-  // keyword, category (or false), result count
-  useMatomoSearch(query.value, 'docs', results.value.length)
-}
-</script>
+```ts
+useDataLayerPush({ event: 'cta_click', label: 'hero' })
 ```
 
-Enjoy !
+### `useMatomoEvent`
+
+[Tracks an event](https://matomo.org/guide/reports/event-tracking/). The 5th argument holds optional custom dimensions.
+
+```ts
+useMatomoEvent('Category', 'Action', 'event_name', 23, { dimension1: 'Some value' })
+```
+
+### `useMatomoGoal`
+
+Converts a goal, with an optional revenue.
+
+```ts
+useMatomoGoal(4)
+useMatomoGoal(4, 49.9)
+```
+
+### `useMatomoCustomDimension`
+
+Sets a [custom dimension](https://matomo.org/guide/reporting-tools/custom-dimensions/) value.
+
+```ts
+useMatomoCustomDimension(1, 'premium')
+```
+
+### `useMatomoCustomVariable`
+
+Sets a custom variable, scoped to the `'page'` (default) or the `'visit'`.
+
+```ts
+useMatomoCustomVariable(1, 'plan', 'pro', 'visit')
+```
+
+### `useMatomoSearch`
+
+Tracks an [internal site search](https://developer.matomo.org/api-reference/tracking-javascript#internal-search-tracking): keyword, category (or `false`) and result count.
+
+```ts
+useMatomoSearch(query.value, 'docs', results.value.length)
+```
+
+> `useMatomoEvent`, `useMatomoGoal`, `useMatomoCustomDimension`, `useMatomoCustomVariable` and `useMatomoSearch` push to `window._paq`, which is read by the *Matomo Analytics* tag of your container.
+
+## Upgrade from v2
+
+- Nuxt 4.1 or later is required.
+- The container is now loaded by Nuxt Scripts, once the app is ready (`trigger: 'onNuxtReady'`). Set `trigger: 'client'` to load it as early as v2 did.
+- The `page_view` event payload is unchanged. Set `pageViewEvent: false` to disable it.
+- `runtimeConfig.public.matomo` and the `NUXT_PUBLIC_MATOMO_*` env vars keep working.
+
+## Contributing
+
+```bash
+npm install
+npm run dev:prepare   # generate type stubs
+npm run dev           # start the playground on http://localhost:3000
+npm run lint
+npm run test
+npm run test:types
+```
+
+The playground serves a fake container from `playground/public/js`, so you can try every feature without a Matomo instance.
 
 <!-- Badges -->
 

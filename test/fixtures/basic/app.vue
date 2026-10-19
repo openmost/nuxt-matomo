@@ -6,7 +6,8 @@
 // Reference every auto-imported composable from `#imports`. If the module
 // stops registering any of these via `addImportsDir` (e.g. by reverting to
 // `export default`), Nuxt's unimport step fails the build — which is the
-// regression covered by GitHub issue #3.
+// regression covered by GitHub issue #3. `useScriptMatomoTagManager` is
+// registered through the Nuxt Scripts registry hook.
 import {
   useDataLayerPush,
   useMatomoCustomDimension,
@@ -14,6 +15,7 @@ import {
   useMatomoEvent,
   useMatomoGoal,
   useMatomoSearch,
+  useScriptMatomoTagManager,
 } from '#imports'
 
 // Reference the composables so tree-shaking can't drop the imports.
@@ -24,5 +26,6 @@ defineExpose({
   useMatomoEvent,
   useMatomoGoal,
   useMatomoSearch,
+  useScriptMatomoTagManager,
 })
 </script>

@@ -9,7 +9,6 @@ import { __resetRuntimeConfigMatomo, __setRuntimeConfigMatomo } from './mocks/im
 
 declare global {
   interface Window {
-    _paq?: unknown[]
     dataLayer?: unknown[]
   }
 }

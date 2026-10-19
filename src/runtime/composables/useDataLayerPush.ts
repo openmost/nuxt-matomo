@@ -5,6 +5,6 @@ export function useDataLayerPush(args: Record<string, unknown>) {
 
   const name = useRuntimeConfig().public.matomo?.dataLayerName || 'dataLayer'
   const target = window as unknown as Record<string, unknown[] | undefined>
-  target[name] = target[name] || []
-  target[name]!.push(args)
+  const queue = target[name] = target[name] || []
+  queue.push(args)
 }

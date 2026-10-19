@@ -1,6 +1,5 @@
-export function useMatomoGoal(goalId: number) {
-  if (import.meta.client) {
-    window._paq = window._paq || []
-    window._paq.push(['trackGoal', goalId])
-  }
+import { pushToPaq } from '../utils/paq'
+
+export function useMatomoGoal(goalId: number, revenue?: number) {
+  pushToPaq(revenue === undefined ? ['trackGoal', goalId] : ['trackGoal', goalId, revenue])
 }

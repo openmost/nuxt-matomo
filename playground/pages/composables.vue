@@ -15,6 +15,26 @@
     </header>
 
     <section>
+      <h2>useScriptMatomoTagManager</h2>
+      <p>
+        Container loaded through Nuxt Scripts. Status:
+        <strong data-testid="mtm-status">{{ status }}</strong>
+      </p>
+      <button
+        type="button"
+        @click="load()"
+      >
+        Load container
+      </button>
+      <button
+        type="button"
+        @click="onMtmPush"
+      >
+        Push <code>{ event: 'mtm_click' }</code> to <code>_mtm</code>
+      </button>
+    </section>
+
+    <section>
       <h2>useDataLayerPush</h2>
       <p>Pushes an arbitrary payload to <code>window.dataLayer</code>.</p>
       <button
@@ -100,6 +120,9 @@
 
       <h3><code>window._paq</code></h3>
       <pre>{{ paq }}</pre>
+
+      <h3><code>window._mtm</code></h3>
+      <pre>{{ mtm }}</pre>
     </section>
   </div>
 </template>
@@ -113,6 +136,7 @@ import {
   useMatomoEvent,
   useMatomoGoal,
   useMatomoSearch,
+  useScriptMatomoTagManager,
   useSeoMeta,
 } from '#imports'
 
@@ -120,17 +144,27 @@ useSeoMeta({
   title: 'Composables playground',
 })
 
+const { status, load, proxy } = useScriptMatomoTagManager()
+
 const dataLayer = ref<unknown[]>([])
 const paq = ref<unknown[]>([])
+const mtm = ref<unknown[]>([])
 
 function refresh() {
   dataLayer.value = [...(window.dataLayer ?? [])]
   paq.value = [...(window._paq ?? [])]
+  mtm.value = [...(window._mtm ?? [])]
 }
 
 function reset() {
   window.dataLayer = []
   window._paq = []
+  window._mtm = []
+  refresh()
+}
+
+function onMtmPush() {
+  proxy._mtm.push({ event: 'mtm_click' })
   refresh()
 }
 

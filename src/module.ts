@@ -1,79 +1,123 @@
-import { addImportsDir, addPlugin, createResolver, defineNuxtModule, useLogger } from '@nuxt/kit'
+import { addImports, addImportsDir, addPlugin, createResolver, defineNuxtModule, useLogger } from '@nuxt/kit'
 import { defu } from 'defu'
+import { MatomoTagManagerOptions } from './runtime/registry/schema'
+
+export type MatomoTrigger = 'onNuxtReady' | 'client' | 'manual'
 
 export interface ModuleOptions {
   /**
    * Matomo URL (e.g. https://matomo.example.com or https://your.matomo.cloud).
-   * Mirrored into `runtimeConfig.public.matomo.host` (env: `NUXT_PUBLIC_MATOMO_HOST`).
+   * Env: `NUXT_PUBLIC_MATOMO_HOST`.
    */
   host?: string
   /**
-   * Matomo Tag Manager container id. Mirrored into
-   * `runtimeConfig.public.matomo.containerId` (env: `NUXT_PUBLIC_MATOMO_CONTAINER_ID`).
+   * Matomo Tag Manager container id.
+   * Env: `NUXT_PUBLIC_MATOMO_CONTAINER_ID`.
    */
   containerId?: string
+  /**
+   * When the container is loaded, using Nuxt Scripts triggers:
+   * - `'onNuxtReady'` *(default)*: once the app is hydrated and idle, best for Core Web Vitals.
+   * - `'client'`: as soon as possible on the client.
+   * - `'manual'`: never on its own. Call `useScriptMatomoTagManager().load()`,
+   *   e.g. once the visitor accepts your cookie banner.
+   * Env: `NUXT_PUBLIC_MATOMO_TRIGGER`.
+   */
+  trigger?: MatomoTrigger
   /**
    * Name of the global array `useDataLayerPush` writes to.
    * Defaults to `'dataLayer'` (the GTM-style queue Matomo Tag Manager
    * picks up when "Synchronize with GTM Data Layer events" is enabled).
-   * Set to `'_mtm'` to push directly into Matomo's own queue, or any
-   * other name your container is configured to read from.
+   * Set to `'_mtm'` to push directly into Matomo's own queue.
    * Env: `NUXT_PUBLIC_MATOMO_DATA_LAYER_NAME`.
    */
   dataLayerName?: string
+  /**
+   * Push a `page_view` event to the data layer on every page, with the
+   * resolved URL, referrer and title.
+   * @default true
+   */
+  pageViewEvent?: boolean
 }
 
 export interface MatomoPublicRuntimeConfig {
   host?: string
   containerId?: string
+  trigger?: MatomoTrigger
   dataLayerName?: string
 }
 
-declare module '@nuxt/schema' {
+declare module 'nuxt/schema' {
   interface PublicRuntimeConfig {
     matomo?: MatomoPublicRuntimeConfig
   }
 }
 
-const DEFAULT_DATA_LAYER_NAME = 'dataLayer'
-
 export default defineNuxtModule<ModuleOptions>({
   meta: {
-    name: 'nuxt-matomo',
+    name: '@openmost/nuxt-matomo',
     configKey: 'matomo',
     compatibility: {
-      nuxt: '>=3.0.0',
+      nuxt: '>=4.1.0',
     },
   },
-  defaults: {},
+  moduleDependencies: {
+    '@nuxt/scripts': {
+      version: '>=1.3.12',
+    },
+  },
+  defaults: {
+    trigger: 'onNuxtReady',
+    dataLayerName: 'dataLayer',
+    pageViewEvent: true,
+  },
   setup(options, nuxt) {
     const resolver = createResolver(import.meta.url)
     const logger = useLogger('nuxt-matomo')
 
     // Seed runtimeConfig.public.matomo with module options. `defu` keeps any
-    // value already set in nuxt.config or via NUXT_PUBLIC_MATOMO_* env vars,
-    // so runtime overrides always win over module-time defaults.
+    // value already set in nuxt.config, and NUXT_PUBLIC_MATOMO_* env vars
+    // override both at runtime.
     const publicConfig = nuxt.options.runtimeConfig.public
-    const merged = defu(publicConfig.matomo, {
-      host: options.host,
-      containerId: options.containerId,
-      dataLayerName: options.dataLayerName || DEFAULT_DATA_LAYER_NAME,
+    const matomo = defu(publicConfig.matomo, {
+      host: options.host || '',
+      containerId: options.containerId || '',
+      trigger: options.trigger,
+      dataLayerName: options.dataLayerName,
     }) as MatomoPublicRuntimeConfig
-    publicConfig.matomo = merged
+    publicConfig.matomo = matomo
 
-    if (!merged.host || !merged.containerId) {
+    if (!nuxt.options._prepare && (!matomo.host || !matomo.containerId)) {
       logger.warn(
-        'Matomo `host` and/or `containerId` are not configured — the Tag Manager script will not be injected. '
-        + 'Set them via `matomo: { host, containerId }` in nuxt.config, `runtimeConfig.public.matomo`, or '
-        + 'the NUXT_PUBLIC_MATOMO_HOST / NUXT_PUBLIC_MATOMO_CONTAINER_ID env vars.',
+        'Matomo `host` and/or `containerId` are not configured: the Tag Manager container will not be loaded. '
+        + 'Set them via `matomo: { host, containerId }` in nuxt.config or the '
+        + 'NUXT_PUBLIC_MATOMO_HOST / NUXT_PUBLIC_MATOMO_CONTAINER_ID env vars.',
       )
     }
 
-    // Do not add the extension since the `.ts` will be transpiled to `.mjs` after `npm run prepack`
-    addPlugin(resolver.resolve('./runtime/plugins/01.matomo-tag-manager'))
-    addPlugin(resolver.resolve('./runtime/plugins/02.datalayer-page-view'))
+    const tagManagerImport = {
+      name: 'useScriptMatomoTagManager',
+      from: resolver.resolve('./runtime/registry/matomo-tag-manager'),
+    }
+    // Nuxt Scripts only adds registry imports in `modules:done`, after Nuxt has
+    // generated its imports, so register the composable ourselves.
+    addImports(tagManagerImport)
 
-    // Load all composables
-    addImportsDir(resolver.resolve('runtime/composables'))
+    // List Matomo Tag Manager in the Nuxt Scripts registry (Nuxt DevTools).
+    nuxt.hook('scripts:registry', (registry) => {
+      registry.push({
+        registryKey: 'matomoTagManager',
+        label: 'Matomo Tag Manager',
+        category: 'tag-manager',
+        schema: MatomoTagManagerOptions,
+        import: tagManagerImport,
+      })
+    })
+
+    addPlugin(resolver.resolve('./runtime/plugins/matomo-tag-manager.client'))
+    if (options.pageViewEvent)
+      addPlugin(resolver.resolve('./runtime/plugins/page-view.client'))
+
+    addImportsDir(resolver.resolve('./runtime/composables'))
   },
 })
