@@ -2,7 +2,7 @@
 
 ## v3.0.0
 
-[compare changes](https://github.com/openmost/nuxt-matomo/compare/v2.1.4...v3.0.0)
+[compare changes](https://github.com/openmost/nuxt-matomo/compare/v2.2.0...v3.0.0)
 
 ### ⚠️ Breaking changes
 
