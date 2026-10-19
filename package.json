@@ -2,7 +2,10 @@
   "name": "@openmost/nuxt-matomo",
   "version": "3.0.0",
   "description": "Matomo Tag Manager for Nuxt, powered by Nuxt Scripts",
-  "repository": "openmost/nuxt-matomo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openmost/nuxt-matomo.git"
+  },
   "license": "MIT",
   "type": "module",
   "exports": {
